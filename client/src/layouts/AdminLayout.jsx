@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react';
-import api from '../api/axios';
-import { useContext } from 'react';
-import { AuthContext } from "../context/AuthContext";
+import { useState, useContext } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Bell, Menu, X } from 'lucide-react';
+import { LogOut, LayoutDashboard, FileText, Bell, Menu, X, Users, Calendar } from 'lucide-react';
+import { AuthContext } from "../context/AuthContext";
 import { NotificationContext } from '../context/NotificationContext';
 import AIAssistant from '../components/AIAssistant';
 
-const StudentLayout = () => {
+const AdminLayout = () => {
   const { user, logout } = useContext(AuthContext);
   const { notifications, unreadCount, markRead, markAllRead } = useContext(NotificationContext);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,7 +35,7 @@ const StudentLayout = () => {
             </div>
             <div>
               <h3 className="font-sora font-semibold text-sm">{user?.name}</h3>
-              <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full uppercase tracking-wider">{user?.role}</span>
+              <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full uppercase tracking-wider">{user?.role}</span>
             </div>
           </div>
           <button className="md:hidden text-gray-400 hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
@@ -46,12 +44,10 @@ const StudentLayout = () => {
         </div>
         
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <NavLink to="/student/dashboard" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><LayoutDashboard size={20} /> Dashboard</NavLink>
-          <NavLink to="/student/events" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><Calendar size={20} /> Events</NavLink>
-          <NavLink to="/student/grievances" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><FileText size={20} /> Grievances</NavLink>
-          <NavLink to="/student/lost-found" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><Search size={20} /> Lost & Found</NavLink>
-          <NavLink to="/student/mentorship" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><BookOpen size={20} /> Mentorship</NavLink>
-          <NavLink to="/student/profile" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><User size={20} /> Profile</NavLink>
+          <NavLink to="/admin/dashboard" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><LayoutDashboard size={20} /> Dashboard</NavLink>
+          <NavLink to="/admin/users" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><Users size={20} /> User Management</NavLink>
+          <NavLink to="/admin/events" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><Calendar size={20} /> Events</NavLink>
+          <NavLink to="/admin/grievance-pipeline" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}><FileText size={20} /> Grievance Pipeline</NavLink>
         </nav>
         
         <div className="p-4 border-t border-white/10">
@@ -72,7 +68,7 @@ const StudentLayout = () => {
             >
               <Menu size={24} />
             </button>
-            <h1 className="font-sora text-lg font-bold tracking-tight text-white hidden md:block">Campus<span className="text-primary">Connect</span></h1>
+            <h1 className="font-sora text-lg font-bold tracking-tight text-white hidden md:block">Campus<span className="text-primary">Connect</span> <span className="text-gray-400 text-sm font-normal">Admin</span></h1>
           </div>
           
           {/* Notification Bell */}
@@ -131,4 +127,4 @@ const StudentLayout = () => {
   );
 };
 
-export default StudentLayout;
+export default AdminLayout;

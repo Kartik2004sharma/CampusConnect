@@ -7,6 +7,7 @@ router.use(verifyToken, restrictTo('faculty', 'admin'));
 
 router.get('/dashboard', facultyController.getFacultyDashboard);
 
+router.get('/notices', facultyController.getMyNotices);
 router.post('/notices', facultyController.publishNotice);
 router.put('/notices/:id', facultyController.updateNotice);
 router.delete('/notices/:id', facultyController.deleteNotice);

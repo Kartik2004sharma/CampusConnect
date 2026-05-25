@@ -12,10 +12,12 @@ export const NotificationProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
+    let newSocket = null;
+    
     if (user) {
       const token = localStorage.getItem('token');
-      const socketUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001';
-      const newSocket = io(socketUrl, {
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
+      newSocket = io(socketUrl, {
         auth: { token }
       });
 
@@ -43,11 +45,12 @@ export const NotificationProvider = ({ children }) => {
       newSocket.on('recommendation:ready', handleNotification);
 
       setSocket(newSocket);
-
-      return () => newSocket.disconnect();
-    } else {
-      if (socket) socket.disconnect();
     }
+    
+    return () => {
+      if (newSocket) newSocket.disconnect();
+      setSocket(null);
+    };
   }, [user]);
 
   const markRead = (id) => {

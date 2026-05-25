@@ -15,6 +15,21 @@ exports.register = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      // If account exists but is not verified, resend a fresh OTP
+      if (!existingUser.isVerified) {
+        const otp = generateOTP();
+        existingUser.otp = await bcrypt.hash(otp, 12);
+        existingUser.otpExpiry = Date.now() + 10 * 60 * 1000;
+        await existingUser.save();
+
+        await sendEmail({
+          email: existingUser.email,
+          subject: 'CampusConnect Verification OTP',
+          html: `<h1>Welcome to CampusConnect!</h1><p>Your verification OTP is <b>${otp}</b>. It is valid for 10 minutes.</p>`
+        });
+
+        return res.status(200).json({ message: 'OTP sent to email' });
+      }
       return res.status(400).json({ error: 'Email already exists' });
     }
 

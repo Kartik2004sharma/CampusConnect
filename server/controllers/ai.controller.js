@@ -1,9 +1,9 @@
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 const { Grievance, Notice, Event } = require('../models');
 
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || 'dummy_key',
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'dummy_key',
 });
 
 exports.analyzeIssue = async (req, res) => {
@@ -13,9 +13,13 @@ exports.analyzeIssue = async (req, res) => {
     if (!issueDescription) {
       return res.status(400).json({ error: 'Issue description is required' });
     }
+    
+    if (issueDescription.length > 1000) {
+      return res.status(400).json({ error: 'Description too long (max 1000 chars)' });
+    }
 
     // Check if the dummy key is used
-    if (!process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY === 'dummy_key') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'dummy_key') {
       // Mocked AI analysis
       return res.status(200).json({
         category: 'Infrastructure',
@@ -39,18 +43,19 @@ Analyze this issue and provide a JSON response with the following keys:
 Return ONLY the raw JSON format without any markdown wrapper.
 `;
 
-    const response = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
-      max_tokens: 300,
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       temperature: 0.2,
+      response_format: { type: "json_object" },
       messages: [
+        { role: "system", content: "You are an AI assistant for a campus management system. Output JSON only." },
         { role: "user", content: prompt }
       ]
     });
 
     let aiResult;
     try {
-      aiResult = JSON.parse(response.content[0].text);
+      aiResult = JSON.parse(response.choices[0].message.content);
     } catch (parseError) {
       aiResult = {
         category: 'Other',
@@ -67,6 +72,17 @@ Return ONLY the raw JSON format without any markdown wrapper.
   }
 };
 
+const normalizeCategory = (aiCategory) => {
+  const map = {
+    'infrastructure': 'facilities',
+    'academics': 'academic',
+    'hostel': 'hostel',
+    'administrative': 'other',
+    'ragging': 'ragging',
+  };
+  return map[(aiCategory || '').toLowerCase()] || 'other';
+};
+
 exports.quickSubmit = async (req, res) => {
   try {
     const { issueDescription, category, urgency, title } = req.body;
@@ -81,13 +97,14 @@ exports.quickSubmit = async (req, res) => {
       studentId,
       title: title || `Issue regarding ${category || 'campus'}`,
       description: issueDescription,
-      category: category || 'Other',
+      category: normalizeCategory(category),
       priority: urgency === 'Critical' ? 'high' : (urgency === 'Medium' ? 'medium' : 'low'),
       status: 'pending',
       timeline: [{
-        status: 'pending',
-        note: 'Quick-submitted via AI Assistant',
-        date: new Date()
+        action: 'Grievance submitted',
+        updatedBy: studentId,
+        timestamp: new Date(),
+        note: 'Quick-submitted via AI Assistant'
       }]
     });
 

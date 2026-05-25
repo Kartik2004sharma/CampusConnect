@@ -6,6 +6,7 @@ const grievanceSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   status: { type: String, enum: ['pending', 'inProgress', 'resolved', 'escalated'], default: 'pending' },
+  priority: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   trackingId: { type: String, unique: true, required: true },
   timeline: [{

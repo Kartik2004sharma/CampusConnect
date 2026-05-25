@@ -11,9 +11,19 @@ import GrievancePage from './pages/Student/GrievancePage';
 import EventsPage from './pages/Student/EventsPage';
 import MentorshipPage from './pages/Student/MentorshipPage';
 import LostFoundPage from './pages/Student/LostFoundPage';
+import ProfilePage from './pages/Student/ProfilePage';
 
+import FacultyLayout from './layouts/FacultyLayout';
 import FacultyDashboard from './pages/Faculty/FacultyDashboard';
+import FacultyMentorshipPage from './pages/Faculty/FacultyMentorshipPage';
+import FacultyNoticesPage from './pages/Faculty/FacultyNoticesPage';
+import FacultyGrievancePage from './pages/Faculty/FacultyGrievancePage';
+
+import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import UserManagementPage from './pages/Admin/UserManagementPage';
+import AdminEventsPage from './pages/Admin/AdminEventsPage';
+import GrievancePipelinePage from './pages/Admin/GrievancePipelinePage';
 
 function App() {
   return (
@@ -35,20 +45,30 @@ function App() {
             <Route path="events" element={<EventsPage />} />
             <Route path="mentorship" element={<MentorshipPage />} />
             <Route path="lost-found" element={<LostFoundPage />} />
-            <Route path="profile" element={<div className="p-8 text-white text-3xl font-bold font-sora">Student Profile</div>} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
           
-          <Route path="/faculty/dashboard" element={
-            <ProtectedRoute roles={['faculty']}>
-              <FacultyDashboard />
+          <Route path="/faculty" element={
+            <ProtectedRoute roles={['faculty', 'admin']}>
+              <FacultyLayout />
             </ProtectedRoute>
-          } />
+          }>
+            <Route path="dashboard" element={<FacultyDashboard />} />
+            <Route path="mentorship" element={<FacultyMentorshipPage />} />
+            <Route path="grievances" element={<FacultyGrievancePage />} />
+            <Route path="notices" element={<FacultyNoticesPage />} />
+          </Route>
           
-          <Route path="/admin/dashboard" element={
+          <Route path="/admin" element={
             <ProtectedRoute roles={['admin']}>
-              <AdminDashboard />
+              <AdminLayout />
             </ProtectedRoute>
-          } />
+          }>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<UserManagementPage />} />
+            <Route path="events" element={<AdminEventsPage />} />
+            <Route path="grievance-pipeline" element={<GrievancePipelinePage />} />
+          </Route>
         </Routes>
       </BrowserRouter>
       </NotificationProvider>

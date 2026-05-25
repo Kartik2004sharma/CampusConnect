@@ -75,3 +75,40 @@ exports.getGrievancePipeline = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getAllEvents = async (req, res) => {
+  try {
+    const events = await Event.find().sort({ date: -1 }).populate('createdBy', 'name');
+    res.status(200).json({ events });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updateEvent = async (req, res) => {
+  try {
+    const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    res.status(200).json({ event });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.assignGrievance = async (req, res) => {
+  try {
+    const { assignedTo } = req.body;
+    const grievance = await Grievance.findByIdAndUpdate(
+      req.params.id,
+      {
+        assignedTo,
+        status: 'inProgress',
+        $push: { timeline: { action: 'Assigned to faculty', updatedBy: req.user._id, timestamp: new Date() } }
+      },
+      { new: true }
+    ).populate('assignedTo', 'name');
+    res.status(200).json({ grievance });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

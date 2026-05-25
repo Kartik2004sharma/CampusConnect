@@ -19,6 +19,15 @@ exports.getFacultyDashboard = async (req, res) => {
   }
 };
 
+exports.getMyNotices = async (req, res) => {
+  try {
+    const notices = await Notice.find({ postedBy: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json({ notices });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.publishNotice = async (req, res) => {
   try {
     const { title, content, targetAudience, attachments } = req.body;
@@ -72,6 +81,15 @@ exports.approveSession = async (req, res) => {
       { status: 'approved', meetLink: 'https://meet.google.com/demo-link' },
       { new: true }
     );
+    
+    const { emitToUser } = require('../socket/socket');
+    if (session) {
+      emitToUser(session.studentId.toString(), 'session:approved', {
+        message: `Your mentorship session has been approved!`,
+        meetLink: session.meetLink
+      });
+    }
+
     res.status(200).json({ session, message: 'Session approved' });
   } catch (err) {
     res.status(500).json({ error: err.message });
