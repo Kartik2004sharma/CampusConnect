@@ -1,25 +1,21 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// The API key is stored in the environment variable.
+// Ask the user to replace it in their .env if it is a placeholder.
+const resend = new Resend(process.env.RESEND_API_KEY || 're_xxxxxxxxx');
 
 exports.sendEmail = async (options) => {
   try {
-    const mailOptions = {
-      from: `CampusConnect <${process.env.EMAIL_USER}>`,
+    const data = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
       to: options.email,
       subject: options.subject,
       html: options.html
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
+    console.log('Email sent successfully via Resend:', data);
+    return data;
   } catch (error) {
-    console.error('Email could not be sent:', error);
+    console.error('Email could not be sent via Resend:', error);
+    throw error;
   }
 };

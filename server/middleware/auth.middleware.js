@@ -12,7 +12,7 @@ exports.verifyToken = async (req, res, next) => {
       return res.status(401).json({ error: 'You are not logged in! Please log in to get access.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const currentUser = await User.findById(decoded.id);
     if (!currentUser || !currentUser.isActive) {

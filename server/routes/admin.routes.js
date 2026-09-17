@@ -16,5 +16,7 @@ router.put('/events/:id', adminController.updateEvent);
 
 router.get('/grievance-pipeline', adminController.getGrievancePipeline);
 router.patch('/grievances/:id/assign', adminController.assignGrievance);
+router.get('/faculties', adminController.getFaculties);
+router.get('/recent-activity', adminController.getRecentActivity);
 
 module.exports = router;

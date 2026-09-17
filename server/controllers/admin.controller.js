@@ -112,3 +112,59 @@ exports.assignGrievance = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getFaculties = async (req, res) => {
+  try {
+    const faculties = await User.find({ role: 'faculty' }).select('name department profileImage email');
+    res.status(200).json({ faculties });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getRecentActivity = async (req, res) => {
+  try {
+    const recentGrievances = await Grievance.find()
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .populate('studentId', 'name')
+      .select('title status createdAt studentId trackingId');
+
+    const recentEvents = await Event.find()
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .populate('createdBy', 'name')
+      .select('title category createdAt createdBy');
+
+    const recentUsers = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .select('name role createdAt');
+
+    const activity = [
+      ...recentGrievances.map(g => ({
+        type: 'grievance',
+        label: `Grievance: ${g.title}`,
+        sub: `by ${g.studentId?.name || 'Unknown'} · ${g.status}`,
+        trackingId: g.trackingId,
+        timestamp: g.createdAt
+      })),
+      ...recentEvents.map(e => ({
+        type: 'event',
+        label: `Event: ${e.title}`,
+        sub: `${e.category} · by ${e.createdBy?.name || 'Admin'}`,
+        timestamp: e.createdAt
+      })),
+      ...recentUsers.map(u => ({
+        type: 'user',
+        label: `New user: ${u.name}`,
+        sub: u.role,
+        timestamp: u.createdAt
+      }))
+    ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 8);
+
+    res.status(200).json({ activity });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

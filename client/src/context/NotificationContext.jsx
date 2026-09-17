@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useState, useEffect, useContext } from 'react';
 import { io } from 'socket.io-client';
 import { AuthContext } from './AuthContext';
@@ -16,7 +18,7 @@ export const NotificationProvider = ({ children }) => {
     
     if (user) {
       const token = localStorage.getItem('token');
-      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5001';
       newSocket = io(socketUrl, {
         auth: { token }
       });
